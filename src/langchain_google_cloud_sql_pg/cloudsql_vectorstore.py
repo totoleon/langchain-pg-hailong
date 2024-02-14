@@ -237,9 +237,9 @@ class CloudSQLVectorStore(VectorStore):
             values_stmt = f" VALUES ('{id}','{content}','{embedding}'"
             extra = metadata
             for metadata_column in self.metadata_columns:
-                if metadata_column in metadata:
+                if metadata_column in metadata and metadata[metadata_column]:
                     cleaned_value = metadata[metadata_column].replace("'", "''")
-                    values_stmt += f",'{cleaned_value}'"
+                    values_stmt += f",'{metadata[metadata_column]}'"
                     del extra[metadata_column]
                 else:
                     values_stmt += ",null"
