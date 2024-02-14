@@ -233,6 +233,7 @@ class CloudSQLVectorStore(VectorStore):
                 else ""
             )
             insert_stmt = f"INSERT INTO {self.table_name}({self.id_column}, {self.content_column}, {self.embedding_column}{metadata_col_names}"
+            content = content.replace("'", "''")
             values_stmt = f" VALUES ('{id}','{content}','{embedding}'"
             extra = metadata
             for metadata_column in self.metadata_columns:
