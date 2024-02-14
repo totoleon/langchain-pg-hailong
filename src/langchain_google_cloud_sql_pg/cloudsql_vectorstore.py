@@ -233,12 +233,11 @@ class CloudSQLVectorStore(VectorStore):
                 else ""
             )
             insert_stmt = f"INSERT INTO {self.table_name}({self.id_column}, {self.content_column}, {self.embedding_column}{metadata_col_names}"
-            content = content.replace("'", "''")
-            values_stmt = f" VALUES ('{id}','{content}','{embedding}'"
+            values_stmt = f" VALUES ('{id}','{content.replace("'", "''")}','{embedding}'"
             extra = metadata
             for metadata_column in self.metadata_columns:
                 if metadata_column in metadata:
-                    values_stmt += f",'{metadata[metadata_column]}'"
+                    values_stmt += f",'{metadata[metadata_column].replace("'", "''")}'"
                     del extra[metadata_column]
                 else:
                     values_stmt += ",null"
