@@ -118,6 +118,8 @@ class PostgreSQLEngine:
         region: str,
         instance: str,
         database: str,
+        user: str = None,
+        password: str = None,
         loop: Optional[asyncio.AbstractEventLoop] = None,
         thread: Optional[Thread] = None,
     ) -> PostgreSQLEngine:
@@ -139,6 +141,18 @@ class PostgreSQLEngine:
             )
             return conn
 
+        if user and password:
+            async def getconn() -> asyncpg.Connection:
+                conn = await cls._connector.connect_async(  # type: ignore
+                    f"{project_id}:{region}:{instance}",
+                    "asyncpg",
+                    user=user,
+                    password=password,
+                    db=database,
+                    enable_iam_auth=True,
+                )
+                return conn
+
         engine = create_async_engine(
             "postgresql+asyncpg://",
             async_creator=getconn,
@@ -152,8 +166,10 @@ class PostgreSQLEngine:
         region: str,
         instance: str,
         database: str,
+        user: str = None,
+        password: str = None,
     ) -> PostgreSQLEngine:
-        return await cls._create(project_id, region, instance, database)
+        return await cls._create(project_id, region, instance, database, user, password)
 
     async def _aexecute(self, query: str):
         """Execute a SQL query."""
