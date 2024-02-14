@@ -55,6 +55,7 @@ async def _get_iam_principal_email(
         credentials.refresh(request)
     if hasattr(credentials, "_service_account_email"):
         email = credentials._service_account_email
+
     # call OAuth2 api to get IAM principal email associated with OAuth2 token
     url = f"https://oauth2.googleapis.com/tokeninfo?access_token={credentials.token}"
     async with aiohttp.ClientSession() as client:
@@ -67,6 +68,7 @@ async def _get_iam_principal_email(
             "email address using environment's ADC credentials!"
         )
     return email.replace(".gserviceaccount.com", "")
+
 
 
 @dataclass
@@ -209,3 +211,63 @@ class PostgreSQLEngine:
         query += "\n);"
 
         await self._aexecute(query)
+
+    async def init_document_table(
+        self,
+        table_name: str,
+        content_column: str = "page_content",
+        metadata_columns: List[Column] = [],
+        metadata_json_columns: str = "langchain_metadata",
+        store_metadata: bool = True,
+    ) -> None:
+        """
+        Create a table for saving of langchain documents.
+
+        Args:
+            table_name (str): The PgSQL database table name.
+            metadata_columns (List[sqlalchemy.Column]): A list of SQLAlchemy Columns
+                to create for custom metadata. Optional.
+            store_metadata (bool): Whether to store extra metadata in a metadata column
+                if not described in 'metadata' field list (Default: True).
+        """
+
+        query = f"""CREATE TABLE {table_name}(
+            {content_column} TEXT NOT NULL
+            """
+        for column in metadata_columns:
+            query += f",\n{column.name} {column.data_type}" + (
+                "NOT NULL" if not column.nullable else ""
+            )
+        if store_metadata:
+            query += f",\n{metadata_json_columns} JSON"
+        query += "\n);"
+
+        await self._aexecute(query)
+
+    async def _load_document_table(self, table_name: str) -> sqlalchemy.Table:
+        """
+        Load table schema from existing table in PgSQL database.
+
+        Args:
+            table_name (str): The PgSQL database table name.
+
+        Returns:
+            (sqlalchemy.Table): The loaded table.
+        """
+        metadata = sqlalchemy.MetaData()
+        #self._pool.connect().run_sync(metadata.reflect, only=[table_name])
+        async with self._engine.connect() as conn:
+            await conn.run_sync(metadata.reflect, only=[table_name])
+
+        table = Table(table_name, metadata)
+        # Extract the schema information
+        schema = []
+        for column in table.columns:
+            schema.append({
+                "name": column.name,
+                "type": column.type.python_type,
+                "max_length": getattr(column.type, "length", None),
+                "nullable": not column.nullable
+            })
+
+        return metadata.tables[table_name]
