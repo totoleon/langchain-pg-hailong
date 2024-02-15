@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_google_cloud_sql_pg_python.postgresql_engine import PostgreSQLEngine
+from .postgresql_engine import PostgreSQLEngine
 from langchain_core.messages import (
     BaseMessage,
     message_to_dict,
