@@ -15,6 +15,7 @@
 from langchain_google_cloud_sql_pg.cloudsql_vectorstore import CloudSQLVectorStore
 from langchain_google_cloud_sql_pg.postgresql_engine import Column, PostgreSQLEngine
 from langchain_google_cloud_sql_pg.postgresql_loader import PostgreSQLLoader, PostgreSQLDocumentSaver
+from langchain_google_cloud_sql_pg.postgresql_chat_message_history import PostgreSQLChatMessageHistory
 
 
-__all__ = ["PostgreSQLEngine", "Column", "CloudSQLVectorStore", "PostgreSQLLoader", "PostgreSQLDocumentSaver",]
+__all__ = ["PostgreSQLEngine", "Column", "CloudSQLVectorStore", "PostgreSQLLoader", "PostgreSQLDocumentSaver","PostgreSQLChatMessageHistory",]
