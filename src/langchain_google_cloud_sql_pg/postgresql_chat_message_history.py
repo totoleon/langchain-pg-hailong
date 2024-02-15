@@ -2,6 +2,7 @@ from __future__ import annotations
 import json
 from langchain_core.chat_history import BaseChatMessageHistory
 from .postgresql_engine import PostgreSQLEngine
+import asyncio
 from langchain_core.messages import (
     BaseMessage,
     message_to_dict,
