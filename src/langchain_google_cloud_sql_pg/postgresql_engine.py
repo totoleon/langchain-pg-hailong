@@ -100,6 +100,8 @@ class PostgreSQLEngine:
         region: str,
         instance: str,
         database: str,
+        user: str = None,
+        password: str = None,
     ) -> PostgreSQLEngine:
         # Running a loop in a background thread allows us to support
         # async methods from non-async environments
@@ -107,7 +109,7 @@ class PostgreSQLEngine:
         thread = Thread(target=loop.run_forever, daemon=True)
         thread.start()
         coro = cls._create(
-            project_id, region, instance, database, loop=loop, thread=thread
+            project_id, region, instance, database, user=user, password=password, loop=loop, thread=thread
         )
         return asyncio.run_coroutine_threadsafe(coro, loop).result()
 
