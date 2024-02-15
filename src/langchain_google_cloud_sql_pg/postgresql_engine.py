@@ -102,10 +102,12 @@ class PostgreSQLEngine:
         database: str,
         user: str = None,
         password: str = None,
+        loop = None,
     ) -> PostgreSQLEngine:
         # Running a loop in a background thread allows us to support
         # async methods from non-async environments
-        loop = asyncio.new_event_loop()
+        if not loop:
+            loop = asyncio.new_event_loop()
         thread = Thread(target=loop.run_forever, daemon=True)
         thread.start()
         coro = cls._create(
@@ -289,3 +291,13 @@ class PostgreSQLEngine:
             })
 
         return metadata.tables[table_name]
+
+
+    async def init_chat_history_table(self, table_name) -> None:
+        create_table_query = f"""CREATE TABLE IF NOT EXISTS "{table_name}"(
+            id SERIAL PRIMARY KEY,
+            session_id TEXT NOT NULL,
+            data JSONB NOT NULL,
+            type TEXT NOT NULL
+        );"""
+        await self._aexecute(create_table_query)
